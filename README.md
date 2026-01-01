@@ -33,14 +33,6 @@ This repository contains a **fully functional ALU implemented in ARM Assembly**,
 
 ---
 
-## Files
-
-- `main.cpp` / `ALU_Step.s` – ALU main function and step execution  
-- `ALU_DATA` – Data section with registers A, B, OPCODE, RESULT, FLAGS, CMP_OUT  
-- `README.md` – This file  
-
----
-
 ## How to Use
 
 1. Open the project in **Keil MDK** or any ARM-compatible IDE.  
