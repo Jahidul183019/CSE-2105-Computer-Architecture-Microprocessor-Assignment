@@ -19,7 +19,7 @@ This repository contains a **fully functional ALU implemented in ARM Assembly**,
   - Barrel Shifter  
 
 - **Multiplication**  
-  - Simple Booth-style placeholder  
+  - Booth Multiplication
 
 - **Comparison Operations**  
   - Outputs: Greater than, Equal, Less than  
