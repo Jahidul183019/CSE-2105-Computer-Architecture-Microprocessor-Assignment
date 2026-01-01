@@ -13,7 +13,7 @@
 
 
 ;========================================================
-; MAIN SECTION — like your CheckThresholds test loop
+;                    MAIN SECTION 
 ;========================================================
         AREA    MAIN_CODE, CODE, READONLY, ALIGN=2
 
@@ -51,8 +51,6 @@ ALU_Step
         LDR     R3, [R0]          ; A
         LDR     R4, [R1]          ; B
         LDR     R5, [R2]          ; OPCODE
-
-        ; (NO 16-bit MASK ANYMORE)
 
 
 ;========================================================
