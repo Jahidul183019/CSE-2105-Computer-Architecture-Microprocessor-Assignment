@@ -35,7 +35,7 @@ This repository contains a **fully functional ALU implemented in ARM Assembly**,
 
 ## How to Use
 
-1. Open the project in **Keil MDK** or any ARM-compatible IDE.  
+1. Open the project in **Keil MDK** (Cortex ARM M4)  
 2. Modify registers `A`, `B`, and `OPCODE` in the **watch window** to test different operations.  
 3. Run `main` loop to execute `ALU_Step` repeatedly.  
 4. Inspect **RESULT**, **FLAGS**, and **CMP_OUT** to verify outcomes.  
