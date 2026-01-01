@@ -260,12 +260,13 @@ BOOTH_LOOP
 
 BOOTH_STEP
         CMP     R0, #0
-        BEQ     BOOTH_SUB
-        ADD     R9, R9, R3
+        BEQ     BOOTH_ADD       ; Q0=0,Q-1=1  -> ADD
+        SUB     R9, R9, R3      ; Q0=1,Q-1=0  -> SUB
         B       BOOTH_SHIFT
 
-BOOTH_SUB
-        SUB     R9, R9, R3
+BOOTH_ADD
+        ADD     R9, R9, R3
+        B       BOOTH_SHIFT
 
 BOOTH_SHIFT
         AND     R2, R9, #1
