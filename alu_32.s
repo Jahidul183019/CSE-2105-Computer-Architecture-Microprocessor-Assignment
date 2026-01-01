@@ -1,3 +1,5 @@
+        THUMB
+
         ;========================================================
         ; EXPORTS (for Keil Watch)
         ;========================================================
@@ -102,10 +104,14 @@ ALU_Step
         BEQ     BOOTH_MUL
 
         CMP     R5, #20
-        BEQ     COMPARATOR
+        BNE     NOT_OP20
+        B       COMPARATOR
+NOT_OP20
 
         CMP     R5, #21
-        BEQ     PARITY_CHECK
+        BNE     NOT_OP21
+        B       PARITY_CHECK
+NOT_OP21
 
         B       ALU_EXIT         ; invalid opcode ? do nothing
 
@@ -129,20 +135,18 @@ ALU_DEC
         SUBS    R9, R3, #1
         B       STORE_RESULT
 
-; Add with carry (carry-in from FLAGS bit0)
 ALU_ADC
         LDR     R10, [R7]
         AND     R10, R10, #1
-        ADCS    R9, R3, R4
-        ADC     R9, R9, R10
+        ADDS    R9, R3, R4
+        ADD     R9, R9, R10
         B       STORE_RESULT
 
-; Sub with borrow (borrow from FLAGS bit0)
 ALU_SBB
         LDR     R10, [R7]
         AND     R10, R10, #1
-        SBCS    R9, R3, R4
-        SBC     R9, R9, R10
+        SUBS    R9, R3, R4
+        SUB     R9, R9, R10
         B       STORE_RESULT
 
 
@@ -199,16 +203,15 @@ SHIFT_ASR
         ASR     R9, R3, R4
         B       STORE_RESULT
 
-; Rotate left: (A<<n) | (A>>(16-n))
 SHIFT_ROL
         AND     R4, R4, #0xF
         CMP     R4, #0
         BEQ     ROL_ZERO
 
         MOVS    R10, #16
-        SUB     R10, R10, R4     ; 16-n -> R10
-        LSL     R9, R3, R4       ; temp1 = A<<n
-        LSR     R11, R3, R10     ; temp2 = A>>(16-n)
+        SUB     R10, R10, R4
+        LSL     R9, R3, R4
+        LSR     R11, R3, R10
         ORR     R9, R9, R11
         B       STORE_RESULT
 
@@ -216,7 +219,6 @@ ROL_ZERO
         MOV     R9, R3
         B       STORE_RESULT
 
-; Rotate right using ROR
 SHIFT_ROR
         AND     R4, R4, #0xF
         CMP     R4, #0
@@ -240,10 +242,42 @@ BARREL_SHIFT
 
 
 ;========================================================
-; 5. MULTIPLY (placeholder instead of full Booth)
+; 5. BOOTH MULTIPLICATION (signed 32-bit)
 ;========================================================
 BOOTH_MUL
-        MUL     R9, R3, R4
+        MOV     R9, #0
+        MOV     R10, R4
+        MOV     R12, #0
+        MOV     R11, #32
+
+BOOTH_LOOP
+        ANDS    R0, R10, #1
+        EOR     R1, R0, R12
+
+        CMP     R1, #1
+        BEQ     BOOTH_STEP
+        B       BOOTH_SHIFT
+
+BOOTH_STEP
+        CMP     R0, #0
+        BEQ     BOOTH_SUB
+        ADD     R9, R9, R3
+        B       BOOTH_SHIFT
+
+BOOTH_SUB
+        SUB     R9, R9, R3
+
+BOOTH_SHIFT
+        AND     R2, R9, #1
+        ASR     R9, R9, #1
+        MOV     R1, R10, LSR #1
+        ORR     R10, R1, R2, LSL #31
+        MOV     R12, R0
+
+        SUBS    R11, R11, #1
+        BNE     BOOTH_LOOP
+
+        MOV     R9, R10
         B       STORE_RESULT
 
 
@@ -277,16 +311,18 @@ CMP_LT
 ;========================================================
 PARITY_CHECK
         MOV     R10, R3
-        MOV     R11, #0
+        MOV     R11, #1
 
 PARITY_LOOP
         TST     R10, #1
+        BEQ     PARITY_SKIP
         EOR     R11, R11, #1
+PARITY_SKIP
         LSR     R10, R10, #1
         CMP     R10, #0
         BNE     PARITY_LOOP
 
-        STR     R11, [R6]        ; store parity in RESULT
+        STR     R11, [R6]
         B       ALU_EXIT
 
 
@@ -294,7 +330,6 @@ PARITY_LOOP
 ; STORE RESULT + FLAGS
 ;========================================================
 STORE_RESULT
-        ; ***** MASK REMOVED: full 32-bit result stored *****
         STR     R9, [R6]
 
         MRS     R10, APSR
@@ -312,13 +347,13 @@ ALU_EXIT
 
 
 ;========================================================
-; DATA SECTION (same style as ALERT_DATA)
+; DATA SECTION
 ;========================================================
         AREA    ALU_DATA, DATA, READWRITE, ALIGN=2
 
-A           DCD     0x1234      ; you can edit in Watch
+A           DCD     0x1234
 B           DCD     0x00F3
-OPCODE      DCD     0           ; default: ADD
+OPCODE      DCD     0
 RESULT      DCD     0
 FLAGS       DCD     0
 CMP_OUT     DCD     0
